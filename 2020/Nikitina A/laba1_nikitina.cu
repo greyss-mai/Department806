@@ -3,14 +3,14 @@
 #include "device_launch_parameters.h"
 #include <stdio.h>
 
-#define n 10 //длина вектора
+#define n 10 //Р”Р»РёРЅР° РІРµРєС‚РѕСЂР°
 
-//ядро выполняется паралельно на большом числе нитей
+//РЇРґСЂРѕ РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РїР°СЂР°Р»Р»РµР»СЊРЅРѕ РЅР° Р±РѕР»СЊС€РѕРј С‡РёСЃР»Рµ РЅРёС‚РµР№
 __global__ void kernel(int* a, int* b, int* c)
 {
-	//глобальный индекс нити
+	//РіР»РѕР±Р°Р»СЊРЅС‹Р№ РёРЅРґРµРєСЃ РЅРёС‚Рё
 	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	//выполнить обработку соотвествующих данной нити данных
+	//РІС‹РїРѕР»РЅРёС‚СЊ РѕР±СЂР°Р±РѕС‚РєСѓ СЃРѕРѕС‚РІРµСЃС‚РІСѓСЋС‰РёС… РґР°РЅРЅРѕР№ РЅРёС‚Рё РґР°РЅРЅС‹С…
 	c[idx] = a[idx] * b[idx];
 }
 
@@ -20,35 +20,35 @@ int main(void)
 	int a[n], b[n], c[n];
 	int* adev, * bdev, * cdev;
 
-	//выделить память на GPU
+	//РІС‹РґРµР»РёС‚СЊ РїР°РјСЏС‚СЊ РЅР° GPU
 	cudaMalloc((void**)&adev, numBytes);
 	cudaMalloc((void**)&bdev, numBytes);
 	cudaMalloc((void**)&cdev, numBytes);
 
-	//Задаем массивы
+	//Р·Р°РґР°РµРј РІРµРєС‚РѕСЂС‹
 	for (int i = 0; i < n; i++)
 	{
 		a[i] = i;
 		b[i] = i * i;
 	}
 
-	//скопировать входные данные из памяти CPU в память GPU
+	//РєРѕРїРёСЂСѓРµРј РІС…РѕРґРЅС‹Рµ РґР°РЅРЅС‹Рµ РёР· РїР°РјСЏС‚Рё CPU РІ РїР°РјСЏС‚СЊ GPU
 	cudaMemcpy(adev, a, numBytes, cudaMemcpyHostToDevice);
 	cudaMemcpy(bdev, b, numBytes, cudaMemcpyHostToDevice);
 
-	//вызов ядра с заданной конфигурацией запуска
+	//РІС‹Р·РѕРІ СЏРґСЂР° СЃ Р·Р°РґР°РЅРЅРѕР№ РєРѕРЅС„РёРіСѓСЂР°С†РёРµР№ Р·Р°РїСѓСЃРєР°
 	kernel <<<n, 1 >>> (adev, bdev, cdev);
 
-	//скопировать результаты в память CPU
+	//РєРѕРїРёСЂРѕРІР°РЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚РѕРІ РІ РїР°РјСЏС‚СЊ CPU
 	cudaMemcpy(c, cdev, numBytes, cudaMemcpyDeviceToHost);
 
-	//Вывод результата
+	//РІС‹РІРѕРґ СЂРµР·СѓР»СЊС‚Р°С‚Р°
 	for (int idx = 0; idx < n; idx++)
 	{
 		printf("%d * %d = %d \n", a[idx], b[idx], c[idx]);
 	}
 
-	//освободить выделенную память GPU
+	//РѕСЃРІРѕР±РѕР¶РґРµРЅРёРµ РІС‹РґРµР»Р»РµРЅРЅРѕР№ РїР°РјСЏС‚Рё GPU
 	cudaFree(adev);
 	cudaFree(bdev);
 	cudaFree(cdev);
