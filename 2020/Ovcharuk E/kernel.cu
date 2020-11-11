@@ -34,8 +34,8 @@ int main()
     for (int i = 0; i < 900; i++) {
         seq[i] = count++;
     }
-
-    // Add vectors in parallel.
+    
+    // find Armstrong numbers with GPU
     cudaError_t cudaStatus = addWithCuda(seq, arraySize);
     if (cudaStatus != cudaSuccess) {
         fprintf(stderr, "addWithCuda failed!");
