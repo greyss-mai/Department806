@@ -22,7 +22,7 @@ int cpu_matrix_multiplication(int *matrix_a, int *matrix_b, int *matrix_c, int a
 
 __global__ void matrixMul(int *matrix_a, int *matrix_b, int *matrix_c, int a_n, int b_n, int a_m, int b_m)
 {
-	  int id = blockIdx.x*blockDim.x+threadIdx.x;
+	int id = blockIdx.x*blockDim.x+threadIdx.x;
     int temp = id;
     while(temp < a_n * b_m)
     {
@@ -31,9 +31,9 @@ __global__ void matrixMul(int *matrix_a, int *matrix_b, int *matrix_c, int a_n, 
       
         *(matrix_c + ROW * b_m + COL) = 0;
 
-		    for(int k = 0; k < a_m; k++){
-			    * (matrix_c + ROW * b_m + COL) += (* (matrix_a + ROW * a_m + k)) * (* (matrix_b + k * b_m + COL));
-		    } 
+		for(int k = 0; k < a_m; k++){
+			* (matrix_c + ROW * b_m + COL) += (* (matrix_a + ROW * a_m + k)) * (* (matrix_b + k * b_m + COL));
+		} 
      
         temp +=blockDim.x*gridDim.x;
     }
@@ -144,7 +144,7 @@ void compute(int a_row, int b_row, int a_col, int b_col, bool show_matrix_flag =
     free(matrix_b);
     
     if(!show_matrix_flag){
-		    printf("\n\nВремя выполнения (ms) A[%d,%d] * B[%d, %d]:", a_row, a_col, b_row, b_col);
+		printf("\n\nВремя выполнения (ms) A[%d,%d] * B[%d, %d]:", a_row, a_col, b_row, b_col);
         printf("CPU - %d, GPU - %d\n",  time_cpu, time_gpu);
     }
 }
