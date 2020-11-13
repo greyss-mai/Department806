@@ -1,0 +1,35 @@
+Array length: 1e+03
+CPU time: 0.0000030000
+GPU time: 0.0000300000
+CPU / GPU time: 0.1000000089
+--------------------------
+Array length: 1e+04
+CPU time: 0.0000170000
+GPU time: 0.0000150000
+CPU / GPU time: 1.1333333254
+--------------------------
+Array length: 1e+05
+CPU time: 0.0001570000
+GPU time: 0.0000560000
+CPU / GPU time: 2.8035714626
+--------------------------
+Array length: 1e+06
+CPU time: 0.0015930000
+GPU time: 0.0001070000
+CPU / GPU time: 14.8878507614
+--------------------------
+Array length: 1e+07
+CPU time: 0.0167449992
+GPU time: 0.0002150000
+CPU / GPU time: 77.8837203979
+--------------------------
+Array length: 1e+08
+CPU time: 0.1667989939
+GPU time: 0.0011680000
+CPU / GPU time: 142.8073577881
+--------------------------
+Array length: 1e+09
+CPU time: 2.5951690674
+GPU time: 0.0128690004
+CPU / GPU time: 201.6605072021
+--------------------------

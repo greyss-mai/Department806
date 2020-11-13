@@ -1,0 +1,50 @@
+Matrix stack params: (10, 10) x 1e+06
+CPU time mean: 3.6748294830
+GPU time mean: 0.4241251051
+CPU / GPU time: 8.6644945145
+--------------------------
+Matrix stack params: (9, 9) x 1e+06
+CPU time mean: 2.2390303612
+GPU time mean: 0.4479223788
+CPU / GPU time: 4.9987015724
+--------------------------
+Matrix stack params: (8, 8) x 1e+06
+CPU time mean: 1.8625169992
+GPU time mean: 0.4069282115
+CPU / GPU time: 4.5770163536
+--------------------------
+Matrix stack params: (7, 7) x 1e+06
+CPU time mean: 1.4938950539
+GPU time mean: 0.4404541850
+CPU / GPU time: 3.3917150497
+--------------------------
+Matrix stack params: (6, 6) x 1e+06
+CPU time mean: 0.8543395996
+GPU time mean: 0.4500929713
+CPU / GPU time: 1.8981403112
+--------------------------
+Matrix stack params: (5, 5) x 1e+06
+CPU time mean: 0.3710805178
+GPU time mean: 0.4227731824
+CPU / GPU time: 0.8777295351
+--------------------------
+Matrix stack params: (4, 4) x 1e+06
+CPU time mean: 0.1551876962
+GPU time mean: 0.4792818129
+CPU / GPU time: 0.3237921596
+--------------------------
+Matrix stack params: (3, 3) x 1e+06
+CPU time mean: 0.0591263957
+GPU time mean: 0.2892547548
+CPU / GPU time: 0.2044094205
+--------------------------
+Matrix stack params: (2, 2) x 1e+06
+CPU time mean: 0.0150581999
+GPU time mean: 0.1995801181
+CPU / GPU time: 0.0754493997
+--------------------------
+Matrix stack params: (1, 1) x 1e+06
+CPU time mean: 0.0028860001
+GPU time mean: 0.0767968968
+CPU / GPU time: 0.0375796445
+--------------------------
