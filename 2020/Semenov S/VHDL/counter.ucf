@@ -1,0 +1,8 @@
+# PlanAhead Generated physical constraints 
+
+NET "COUNT_OUT[3]" LOC = W15;
+NET "COUNT_OUT[2]" LOC = D21;
+NET "COUNT_OUT[1]" LOC = AB4;
+NET "COUNT_OUT[0]" LOC = D17;
+NET "CLOCK" LOC = AB13;
+NET "DIRECTION" LOC = C18;
