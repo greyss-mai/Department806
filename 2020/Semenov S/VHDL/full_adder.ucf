@@ -1,0 +1,5 @@
+net "a" loc = "C18";	#Sw0 1 on S2 DIP switch
+net "b" loc = "Y6";	#Sw1 2 on S2 DIP switch
+net "cin" loc = "W6";	#Sw2 3 on S2 DIP switch
+net "sum" loc = "D17";	#Led0 on DS3 LED
+net "cout" loc = "AB4";	#Led1 on DS4 LED
