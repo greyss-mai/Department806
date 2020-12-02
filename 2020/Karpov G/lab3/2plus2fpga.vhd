@@ -25,9 +25,9 @@ architecture Behavioral of adder is
 signal buffCarry : STD_LOGIC;
 begin
 sum1 <= a1 xor b1;
-sum2 <= a2 xor b2 xor buffCarry;
 buffCarry <= (a1 and b1);
-carry <= (a2 and b2) or (b2 and buffCarry);
+sum2 <= a2 xor b2 xor buffCarry;
+carry <= ((a2 xor b2) and buffCarry) or (a2 and b2);
 
 end Behavioral;
 

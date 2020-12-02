@@ -1,5 +1,5 @@
 net "a1" loc = "C18"; 
-net "a2" loc = "DY6"; 
+net "a2" loc = "Y6"; 
 net "b1" loc = "W6"; 
 net "b2" loc = "E4"; 
 net "sum1" loc = "D17"; 
