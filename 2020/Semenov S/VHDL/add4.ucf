@@ -3,10 +3,10 @@ net "a(1)" loc = "Y6";	#Sw1 2 on S2 DIP switch
 net "a(2)" loc = "W6";	#Sw2 3 on S2 DIP switch
 net "a(3)" loc = "E4";	#Sw3 4 on S2 DIP switch
 
-net "b(0)" loc = "F3";	#Sw0 1 on S2 DIP switch
-net "b(1)" loc = "F5";	#Sw1 2 on S2 DIP switch
-net "b(2)" loc = "G6";	#Sw2 3 on S2 DIP switch
-net "b(3)" loc = "C1";	#Sw3 4 on S2 DIP switch
+net "b(0)" loc = "F3";	#Push0 1 on  SW4  pushbutton
+net "b(1)" loc = "F5";	#Push1 2 on  SW5  pushbutton
+net "b(2)" loc = "G6";	#Push2 3 on  SW7  pushbutton
+net "b(3)" loc = "C1";	#Push3 4 on  SW8  pushbutton
 
 net "sum(0)" loc = "D17";	#Led0 on DS3 LED
 net "sum(1)" loc = "AB4";	#Led1 on DS4 LED
