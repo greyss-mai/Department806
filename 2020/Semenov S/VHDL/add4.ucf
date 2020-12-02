@@ -1,0 +1,16 @@
+net "a(0)" loc = "C18";	#Sw0 1 on S2 DIP switch
+net "a(1)" loc = "Y6";	#Sw1 2 on S2 DIP switch
+net "a(2)" loc = "W6";	#Sw2 3 on S2 DIP switch
+net "a(3)" loc = "E4";	#Sw3 4 on S2 DIP switch
+
+net "b(0)" loc = "F3";	#Sw0 1 on S2 DIP switch
+net "b(1)" loc = "F5";	#Sw1 2 on S2 DIP switch
+net "b(2)" loc = "G6";	#Sw2 3 on S2 DIP switch
+net "b(3)" loc = "C1";	#Sw3 4 on S2 DIP switch
+
+net "sum(0)" loc = "D17";	#Led0 on DS3 LED
+net "sum(1)" loc = "AB4";	#Led1 on DS4 LED
+net "sum(2)" loc = "D21";	#Led2 on DS5 LED
+net "sum(3)" loc = "W15";	#Led3 on DS6 LED
+
+net "cout" loc = "V19";		#Led4 on DS7 LED
