@@ -16,26 +16,15 @@
 #include <stdio.h>
 #include <string>
 #include <winsock.h>
+// includes
+#include <helper_functions.h>  // helper for shared functions common to CUDA Samples
+#include <helper_cuda.h>       // helper functions for CUDA error checking and initialization
 
 using namespace std;
 
 typedef unsigned long long uint64;
 
-static double t0 = 0;
-
-double getTime() {
-  timeval tv;
-  time_t tv1;
-  //gettimeofday(&tv, NULL);
-	time(&tv1);
-	tv.tv_sec = tv1;
-	tv.tv_usec = 0;
-  double t = tv.tv_sec + 1e-6 * tv.tv_usec;
-  double s = t - t0;
-  t0 = t;
-  return s;
-}
-
+// Нахождение НОД
 __host__ __device__ uint64 gcd(uint64 u, uint64 v) {
   uint64 shift;
   if (u == 0) return v;
@@ -58,6 +47,13 @@ __host__ __device__ uint64 gcd(uint64 u, uint64 v) {
   } while (v != 0);
   
   return u << shift;
+}
+
+__host__ __device__ bool prime(uint64 n){ 
+	for(uint64 i=2;i<=sqrt(n);i++)
+		if(n%i==0)
+			return false;
+	return true;
 }
 
 __global__ void clearPara(uint64 * da, uint64 * dc, uint64 m) {
@@ -98,6 +94,8 @@ uint64 pollard(uint64 num)
   if (num % 5 == 0) return 5;
   if (num % 7 == 0) return 7;
   if (upper * upper == num) return upper;
+  if (prime(num)) return num;
+	
   uint64 *resultd = NULL, *dx = NULL, *dy = NULL, *da = NULL, *dc = NULL;
   cudaMalloc((void**)&resultd, sizeof(uint64));
   cudaMemset(resultd, 0, sizeof(uint64));
@@ -112,9 +110,10 @@ uint64 pollard(uint64 num)
   curandGenerateLongLong(gen, dc, nB * nT);
   cudaMemset(dx, 0, nB * nT * sizeof(uint64));
   cudaMemset(dy, 0, nB * nT * sizeof(uint64));
+	// nB - gridSize nT - blockSize
   clearPara<<<nB, nT>>>(da, dc, upper);
 
-  while(result == 0) {
+ while(result == 0) {
     pollardKernel<<<nB, nT>>>(num, resultd, dx, dy, da, dc);
     cudaMemcpy(&result, resultd, sizeof(uint64), cudaMemcpyDeviceToHost);
   }
@@ -137,6 +136,7 @@ uint64 pollardhost(uint64 num)
   if (num % 7 == 0) return 7;  
 
   if (upper * upper == num) return upper;
+  if (prime(num)) return num;
 
   bool quit = false;
 
@@ -165,32 +165,108 @@ uint64 pollardhost(uint64 num)
   return result;
 }
 
+uint64 pollardhost1(uint64 num)
+{
+int result = 0;
+	while(result == 0) {
+		 result =  pollardhost(num);
+		}
+  return result;
+}
+
 
 int main()
 {
 	tryAgain: // это лейбл
-  getTime();
+  //getTime();
   srand(time(NULL));
+	
+  auto elapsedTimeInMsGPU = 0.0f;
+  float elapsedTimeInMsCPU = 0.0f;
+  StopWatchInterface *timerCPU = NULL;
+  StopWatchInterface *timerGPU = NULL;
 
-
-  int n =0;
+  uint64 n = 0;
   printf("Input num: ");
   scanf("%d", &n);             //задаем размер
   uint64 num = n;
-  // StopWatchInterface *timer = NULL;
+  //
+  uint64 result;
+  uint64 prevNum;
+  string res1;
+  string res2;
+  string res3;
+  string res4;
+  string res5;
+  string res6;
+  string res7;
+  uint64 rslt;
+  string resultString;
+  const char * resultStr;
+  //
+		//SDK timer
+   sdkCreateTimer(&timerGPU);
+   sdkStartTimer(&timerGPU);
+	//
+   result = pollard(num);	
+   prevNum = num/result;
+   res1 = "Result(GPU): ";
+   res2 = to_string(num);
+   res3 = " = ";
+   res4 = to_string(result);
+   res5 = " * ";
+   resultString = res1+res2+res3+res4;  
+   while(!prime(prevNum)) 
+   {
+	 rslt = pollard(prevNum);	
+	 prevNum = prevNum/rslt; 	
+     res6 = to_string(rslt);
+     resultString += res5 + res6;   
+  }
+  res7 = to_string(prevNum);
+  resultString += res5 + res7;
+  resultString += "\n";	
+  resultStr = resultString.c_str();
+	//	
+  sdkStopTimer(&timerGPU);
+  elapsedTimeInMsGPU = sdkGetTimerValue(&timerGPU);
 	
-  uint64 result = pollard(num);
+  //printf("Result(GPU): %lld = %lld * %lld\n", num, result, num / result);  
+  printf(resultStr);
+  printf("Time  : %.6fs\n", elapsedTimeInMsGPU);
 
-  printf("Result(GPU): %lld = %lld * %lld\n", num, result, num / result);
+  //SDK timer
+  sdkCreateTimer(&timerCPU);
+  sdkStartTimer(&timerCPU);
 
-  printf("Time  : %.6fs\n", getTime());
+  result = pollardhost1(num);	
+  prevNum = num/result;
+  res1 = "Result(CPU): ";
+  res2 = to_string(num);
+  res3 = " = ";
+  res4 = to_string(result);
+  res5 = " * ";
+  resultString = res1 + res2 + res3 + res4;  
+  while(!prime(prevNum)) 
+  {
+   rslt = pollardhost1(prevNum);	
+   prevNum = prevNum/rslt; 	
+   res6 = to_string(rslt);
+   resultString += res5 + res6;   
+  }
+  res7 = to_string(prevNum);
+  resultString += res5 + res7;
+  resultString += "\n";	
+  resultStr = resultString.c_str();
 
-  int t2 = clock();
-  result = pollardhost(num);
-  printf("Result(CPU): %lld = %lld * %lld\n", num, result, num / result);
-  printf("Time  : %.6fs\n", getTime());
+  sdkStopTimer(&timerCPU);
+  elapsedTimeInMsCPU = sdkGetTimerValue(&timerCPU);
+	
+  printf(resultStr);
+  printf("Time  : %.6fs\n", elapsedTimeInMsCPU);
 
-	goto tryAgain; // а это оператор goto
+  goto tryAgain; // а это оператор goto
+	
   return 0;
 }
 
