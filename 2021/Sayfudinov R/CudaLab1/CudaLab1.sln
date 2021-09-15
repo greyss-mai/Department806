@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31624.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CudaLab1(CPU)", "CudaLab1(CPU)\CudaLab1(CPU).vcxproj", "{DFF9F210-7EDD-499C-9F22-F37F926918E3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CudaLab1(GPU)", "CudaLab1(GPU)\CudaLab1(GPU).vcxproj", "{7D2EE967-6285-4866-9415-0D108A3E7752}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DFF9F210-7EDD-499C-9F22-F37F926918E3}.Debug|x64.ActiveCfg = Debug|x64
+		{DFF9F210-7EDD-499C-9F22-F37F926918E3}.Debug|x64.Build.0 = Debug|x64
+		{DFF9F210-7EDD-499C-9F22-F37F926918E3}.Release|x64.ActiveCfg = Release|x64
+		{DFF9F210-7EDD-499C-9F22-F37F926918E3}.Release|x64.Build.0 = Release|x64
+		{7D2EE967-6285-4866-9415-0D108A3E7752}.Debug|x64.ActiveCfg = Debug|x64
+		{7D2EE967-6285-4866-9415-0D108A3E7752}.Debug|x64.Build.0 = Debug|x64
+		{7D2EE967-6285-4866-9415-0D108A3E7752}.Release|x64.ActiveCfg = Release|x64
+		{7D2EE967-6285-4866-9415-0D108A3E7752}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E85C9F6F-9A86-4C11-BC68-7AE71D22A15D}
+	EndGlobalSection
+EndGlobal
