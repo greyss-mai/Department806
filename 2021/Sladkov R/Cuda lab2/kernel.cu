@@ -1,90 +1,109 @@
-#include <cuda_runtime.h>
+
+#include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include <stdio.h>
-#include <cmath>
+
 #include <omp.h>
-#include <iostream>
+#include <stdio.h>
 
-#ifndef __CUDACC__ 
-#define __CUDACC__
-#endif
-#include <device_functions.h>
+cudaError_t addWithCuda(unsigned int size);
 
-#define N 100000
+__global__ void addKernel()
+{
+    unsigned int i = threadIdx.x + blockIdx.x * blockDim.x;
+    unsigned int answ = 1;
 
-__global__ void kernel(int* out) {
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	int answ = 1;
+    for (int j = 2; j <= i / 2; j++) {
+        if (i % j == 0) {
+            answ += j;
+        }
+    }
 
-	for (int i = 2; i < idx; i++) {
-		if (idx % i == 0) {
-			answ += i;
-		}
-	}
-
-	if (answ == idx) { 
-		out[idx] = answ;
-	}
-	else
-	{
-		out[idx] = NULL;
-	}
+    if (i == answ && i != 1)
+        printf("%d\n", i);
 }
 
 int main()
 {
+    const int arraySize = 100000;
+    
+    printf("N is %d\n\n", arraySize);
 
-	cudaEvent_t start, stop;
-	float gpuTime = 0.0f;
-	cudaEventCreate(&start);
-	cudaEventCreate(&stop);
-	cudaEventRecord(start, 0);
+    cudaError_t cudaStatus = addWithCuda(arraySize);
 
-	int* out = new int[N];
-	int* dev;
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "addWithCuda failed!");
+        return 1;
+    }
 
-	cudaMalloc((void**)&dev, N * sizeof(float));
-	cudaThreadSynchronize();
+    cudaStatus = cudaDeviceReset();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaDeviceReset failed!");
+        return 1;
+    }
+  
+    double start;
+    double stop;
+    start = omp_get_wtime(); 
+    
+    for (int i = 2; i < arraySize; i++)
+    {
+        unsigned int answ = 1;
 
-	dim3 dimThreads(N / 8, 1);
-	dim3 dimBlocks(N / dimThreads.x, 1);
+        for (int j = 2; j <= i / 2; j++) {
+            if (i % j == 0) {
+                answ += j;
+            }
+        }
 
-	kernel << <dimBlocks, dimThreads >> > (dev);
+        if (i == answ)
+            printf("%d\n", i);
+    }
 
-	cudaMemcpy(out, dev, N * sizeof(float), cudaMemcpyDeviceToHost);
+    stop = omp_get_wtime();
 
-	cudaEventRecord(stop, 0);
-	cudaEventSynchronize(stop);
-	cudaEventElapsedTime(&gpuTime, start, stop);
-	printf("N = %d\n\nGPU compute time: %.10f milliseconds\n", N, gpuTime);
+    printf("Timing CPU Events %.10f", (stop - start) * 1000);
 
-	//for (int i = 0; i < N; i++)
-		//if(out[i]) printf("%d ", out[i]);
+    return 0;
+}
 
-	cudaFree(dev);
-	cudaDeviceReset();
+cudaError_t addWithCuda(unsigned int size)
+{
+    cudaEvent_t start, stop;
+    float gpuTime = 0.0f;
 
-	double start2;
-	double end2;
-	start2 = omp_get_wtime();
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
 
-	float* a = new float[N];
+    cudaEventRecord(start, 0);
 
-	for (int i = 0; i < N; i++) {
-		int answ = 1;
+    cudaError_t cudaStatus;
 
-		for (int j = 2; i < i; j++) {
-			if (i % j == 0) {
-				answ += j;
-			}
-		}
+    cudaStatus = cudaSetDevice(0);
 
-		if (answ == i) a[i] == answ;
-	}
+    addKernel<<<(size + 1023) / 1024, 1024>>>();
 
-	end2 = omp_get_wtime();
+    cudaStatus = cudaGetLastError();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "addKernel launch failed: %s\n", cudaGetErrorString(cudaStatus));
+        goto Error;
+    }
+    
 
-	printf("\n\nCPU compute time: %f milliseconds\n", (end2 - start2) * 1000);
+    cudaStatus = cudaDeviceSynchronize();
+    if (cudaStatus != cudaSuccess) {
+        fprintf(stderr, "cudaDeviceSynchronize returned error code %d after launching addKernel!\n", cudaStatus);
+        goto Error;
+    }
 
-	return 0;
+    cudaEventRecord(stop, 0);
+
+    cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&gpuTime, start, stop);
+
+    printf("Timing CUDA Events %.10f\n\n", gpuTime);
+ 
+Error:
+   
+    return cudaStatus;
 }
