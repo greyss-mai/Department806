@@ -19,33 +19,40 @@
 //количество потоков
 #define N 1024
 //количество блоков
-#define BL 97
+#define BL 98
 
 //код выполняется на GPU
 
-__global__ void staticReverse(long* d, long n)
+__global__ void staticReverse(unsigned int* data_d, unsigned int* result_d, unsigned int n)
 {
-    __shared__ long s[N];
-    long global_t = threadIdx.x + 1024 * blockIdx.x;
+    __shared__ unsigned int s[N];
+    unsigned int global_t = threadIdx.x + 1024 * blockIdx.x;
+   // printf("%d", sizeof(double));
     int t = threadIdx.x;
     
     if (global_t >= n)
         return;
 
     //int tr = N - t - 1;
-    s[t] = d[global_t];
+    s[t] = data_d[global_t];
     __syncthreads();
-    d[n - global_t - 1] = s[t];
+    result_d[n - global_t - 1] = s[t];
 }
 
 int main(int argc, char* argv)
 {
-    const long n = 100000;
-    long a[n], d[n];
+    size_t free, total;
+    printf("\n");
+    cudaMemGetInfo(&free, &total);
+    printf("%d KB free of total %d KB\n", free / 1024, total / 1024);
 
-    for (long i = 0; i < n; i++) {
-        a[i] = i + 1;
-        d[i] = 0;
+    const unsigned int n = 100000;
+    unsigned int *data = new unsigned int[n];
+    unsigned int* result = new unsigned int[n];
+
+    for (unsigned int i = 0; i < n; i++) {
+        data[i] = i + 1;
+        result[i] = 0;
     }
 
     ////---ВЫЧИСЛЕНИЕ НА ВИДЕОКАРТЕ---
@@ -57,12 +64,15 @@ int main(int argc, char* argv)
 
 
 
-    long* d_d;
-    checkCudaErrors(cudaMalloc(&d_d, n * sizeof(long)));
+    unsigned int* data_d;
+    checkCudaErrors(cudaMalloc(&data_d, n * sizeof(unsigned int)));
+
+    unsigned int* result_d;
+    checkCudaErrors(cudaMalloc(&result_d, n * sizeof(unsigned int)));
 
 
     //// Выделение памяти на видеокарте и синхронизация всех потоков
-    checkCudaErrors(cudaMemcpy(d_d, a, n*sizeof(long), cudaMemcpyHostToDevice));
+    checkCudaErrors(cudaMemcpy(data_d, data, n*sizeof(unsigned int), cudaMemcpyHostToDevice));
 
     checkCudaErrors(cudaDeviceSynchronize());
 
@@ -81,7 +91,7 @@ int main(int argc, char* argv)
 
     //// Выполнение кода на видеокарте и ожидание завершения всех потоков
 
-    staticReverse << <BL, N >> > (d_d, n);
+    staticReverse << <BL, N >> > (data_d, result_d, n);
 
 
     checkCudaErrors(cudaStreamSynchronize(stream));
@@ -104,7 +114,7 @@ int main(int argc, char* argv)
 
     //// Копирование результатов с GPU на CPU
     checkCudaErrors(
-        cudaMemcpy(d, d_d, n * sizeof(long), cudaMemcpyDeviceToHost));
+        cudaMemcpy(result, result_d, n * sizeof(unsigned int), cudaMemcpyDeviceToHost));
 
     checkCudaErrors(cudaStreamSynchronize(stream));
 
@@ -116,11 +126,11 @@ int main(int argc, char* argv)
     // Начинаем замер времени
     auto begin = std::chrono::high_resolution_clock::now();
 
-    long r[n];
+    unsigned int cpu_result[n];
 
-    for (long i = 0; i < n; i++)
+    for (unsigned int i = 0; i < n; i++)
     {
-        r[i] = a[n - i - 1];
+        cpu_result[i] = data[n - i - 1];
     }
     
     //// Останавливаем таймер и считаем время выполнения
@@ -133,16 +143,17 @@ int main(int argc, char* argv)
 
     ////проверка значений
 
-    for (long i = 0; i < n; i++)
+    for (unsigned int i = 0; i < n; i++)
     {
-        if (d[i] != r[i])
+        //if (result[i] != cpu_result[i])
+        if(i % 11111 == 0)
         {
-          /* printf("Error: d[%d]!=r[%d] (%d, %d) \n", i, i, d[i], r[i]);*/
+           printf("d[%d] == r[%d] (%d, %d) \n", i, i, result[i], cpu_result[i]);
         }
     }
 
     //// Освобождение памяти
-    checkCudaErrors(cudaFree(d_d));
+    checkCudaErrors(cudaFree(data_d));
     checkCudaErrors(cudaEventDestroy(start));
     checkCudaErrors(cudaEventDestroy(stop));
 
