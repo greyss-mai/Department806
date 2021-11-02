@@ -1,0 +1,21 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/VSWorkspaceState.json
+/.vs/slnx.sqlite
+/.vs/ProjectSettings.json
+/.vs/Department806/v16/ipch/AutoPCH/e58a8c573d257336/MAIN.ipch
+/.vs/Department806/v16/ipch/AutoPCH/e58a8c573d257336
+/.vs/Department806/v16/ipch/AutoPCH/4575dd157906121/TANCOUNT.ipch
+/.vs/Department806/v16/ipch/AutoPCH/4575dd157906121
+/.vs/Department806/v16/ipch/AutoPCH/3ef52c7d8a639d4f/TANCOUNT.ipch
+/.vs/Department806/v16/ipch/AutoPCH/3ef52c7d8a639d4f
+/.vs/Department806/v16/ipch/AutoPCH
+/.vs/Department806/v16/Browse.VC.opendb
+/.vs/Department806/v16/Browse.VC.db-wal
+/.vs/Department806/v16/Browse.VC.db-shm
+/.vs/Department806/v16/Browse.VC.db
+/.vs/Department806/v16/.suo
+/.vs/Department806/v16
+/.vs
