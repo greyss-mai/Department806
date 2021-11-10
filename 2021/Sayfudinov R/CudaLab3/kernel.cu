@@ -6,6 +6,9 @@
 #include <chrono>
 #include <stdio.h>
 #include <stdlib.h>
+#include <thrust/host_vector.h>
+#include <thrust/device_vector.h>
+#include <thrust/reduce.h>
 
 // CUDA runtime
 #include <cuda_runtime.h>
@@ -85,6 +88,9 @@ int main(int argc, char* argv)
     const unsigned int n = N * BL;
     float* result = new float[n];
 
+    //thrust вектор для вывода корней
+    thrust::host_vector<float> h (n,0);
+
     for (unsigned int i = 0; i < n; i++) {
         result[i] = 0;
     }
@@ -148,14 +154,7 @@ int main(int argc, char* argv)
     checkCudaErrors(cudaStreamSynchronize(stream));
 
     //CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU
-
-    float cpu_result[n];
-
-    for (unsigned int i = 0; i < n; i++)
-    {
-        cpu_result[i] = 0;
-    }
-
+    
     // Начинаем замер времени
     auto begin = std::chrono::high_resolution_clock::now();
 
@@ -180,12 +179,8 @@ int main(int argc, char* argv)
 
         } while (fabs(f(c)) >= EPS);  // цикл ищет корень пока его значение больше заданой точности
 
-        cpu_result[i] = c;
-            
-
-        
+        h[i] = c;
     }
-
 
     //// Останавливаем таймер и считаем время выполнения
     auto end = std::chrono::high_resolution_clock::now();
@@ -204,13 +199,12 @@ int main(int argc, char* argv)
             printf("GPU root (%d) == %f \n", i, result[i]);
         }
 
-        if (cpu_result[i] > 1e-05)
+        if (h[i] > 1e-05)
         {
-            //printf("CPU root (%d) == %f \n", i, cpu_result[i]);
+            printf("CPU root (%d) == %f \n", i, h[i]);
         }
     }
-
-    //// Освобождение памяти
+       //// Освобождение памяти
     checkCudaErrors(cudaFree(result_d));
     checkCudaErrors(cudaEventDestroy(start));
     checkCudaErrors(cudaEventDestroy(stop));
