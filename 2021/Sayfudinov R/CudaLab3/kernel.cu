@@ -55,7 +55,7 @@ __global__ void NewtonsMethod(float* result_d, double step)
     //Считаем границы для gpu
     float a = A + blockIdx.x * threadIdx.x * step;
     float b = A + (blockIdx.x * threadIdx.x + 1) * step;
-    
+
     if (f(a) * f(b) * 1.0 > 0)
         return;
 
@@ -73,7 +73,7 @@ __global__ void NewtonsMethod(float* result_d, double step)
 
 
     result_d[blockIdx.x * threadIdx.x] = c;
-    
+
 
 }
 
@@ -86,14 +86,14 @@ int main(int argc, char* argv)
 
     //Создаем массив для вывода корней(результата)
     const unsigned int n = N * BL;
-    float* result = new float[n];
+    
 
     //thrust вектор для вывода корней
-    thrust::host_vector<float> h (n,0);
+    thrust::host_vector<float> h(n, 0);
+    thrust::device_vector<float> d(n, 0);
+        
 
-    for (unsigned int i = 0; i < n; i++) {
-        result[i] = 0;
-    }
+    float* result = thrust::raw_pointer_cast(d);
 
     //Вычисляем шаг для границ поиска корней
     float step = fabs(A - B) * 1.0 / n;
@@ -151,10 +151,10 @@ int main(int argc, char* argv)
     checkCudaErrors(
         cudaMemcpy(result, result_d, n * sizeof(unsigned int), cudaMemcpyDeviceToHost));
 
-    checkCudaErrors(cudaStreamSynchronize(stream));
+      checkCudaErrors(cudaStreamSynchronize(stream));
 
     //CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU//CPU
-    
+
     // Начинаем замер времени
     auto begin = std::chrono::high_resolution_clock::now();
 
@@ -192,6 +192,7 @@ int main(int argc, char* argv)
 
     ////Вывод значений
 
+  
     for (unsigned int i = 0; i < n; i++)
     {
         if (result[i] > 1e-05)
@@ -204,7 +205,7 @@ int main(int argc, char* argv)
             printf("CPU root (%d) == %f \n", i, h[i]);
         }
     }
-       //// Освобождение памяти
+    //// Освобождение памяти
     checkCudaErrors(cudaFree(result_d));
     checkCudaErrors(cudaEventDestroy(start));
     checkCudaErrors(cudaEventDestroy(stop));
