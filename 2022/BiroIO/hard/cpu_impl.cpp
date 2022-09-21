@@ -1,4 +1,3 @@
-#include <omp.h>
 #include <math.h>
 #include <chrono>
 
@@ -31,8 +30,6 @@ namespace timer {
 
 int CPU_mat_add(float* dst, float* mat1, float* mat2, int N, int M) {
 
-    int max_threads = omp_get_max_threads();
-    omp_set_num_threads(max_threads);
 
     timer::point start = timer::get_time();
 

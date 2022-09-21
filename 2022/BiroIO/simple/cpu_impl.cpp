@@ -1,4 +1,3 @@
-#include <omp.h>
 #include <math.h>
 #include <chrono>
 
@@ -30,9 +29,6 @@ namespace timer {
 }
 
 int CPU_sqrt(float* array, int N) {
-
-    int max_threads = omp_get_max_threads();
-    omp_set_num_threads(max_threads);
 
     timer::point start = timer::get_time();
 
