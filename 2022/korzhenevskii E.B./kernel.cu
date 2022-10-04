@@ -1,88 +1,125 @@
-﻿#include "cuda_runtime.h"
+﻿
+#include "cuda_runtime.h"
 #include "device_launch_parameters.h"
+
 #include <stdio.h>
-#include <math.h>
+#include <stdlib.h>
 #include <time.h>
 
+typedef int number;
 
-#define	N	(1024*1024)
+const int SIZE = 100000;
+const int N = 512;
 
-__global__ void kernel(float* data)
+void fillArray(number*& input);
+void printArray(number* input);
+
+__global__ void invert(number* input, number* output)
 {
-    int   idx = blockIdx.x * blockDim.x + threadIdx.x;
-    float x = 2.0f * 3.1415926f * (float)idx / (float)N;
-    data[idx] = sinf(x);
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+	if (tid < SIZE)
+	{
+		output[SIZE - tid - 1] = input[tid];
+	}
 }
 
-int main(int argc, char* argv[])
+
+
+number main(number argc, char** argv)
 {
-    //CPU
 
-    int start2, time2;
-    float* data2 = new float[N];
+	int deviceCount;
+	cudaDeviceProp deviceProp;
 
-    start2 = clock();
+	cudaGetDeviceCount(&deviceCount);
 
-    for (int idx2 = 0; idx2 < N; idx2++)
-    {
-        float x2 = 2.0f * 3.1415926f * (float)idx2 / (float)N;
-        data2[idx2] = sinf(x2);
-    }
+	if (deviceCount < 1) {
+		printf("No CUDA capable device found.\n");
+		return 1;
+	}
 
-    time2 = clock() - start2;
-    double time_CPU = time2;
+	printf("Device count: %d\n\n", deviceCount);
 
-    printf("\nCPU Time: %f milliseconds\n", time_CPU);
+	for (int i = 0; i < deviceCount; i++) {
+		cudaGetDeviceProperties(&deviceProp, i);
 
-    //GPU
+		printf("Device name: %s\n", deviceProp.name);
+		printf("Total global memory: %lu\n", deviceProp.totalGlobalMem);
+		printf("Clock rate: %d\n", deviceProp.clockRate);
+		printf("Max grid size: x = %d, y = %d, z = %d\n",
+			deviceProp.maxGridSize[0],
+			deviceProp.maxGridSize[1],
+			deviceProp.maxGridSize[2]);
+		printf("Compute capability: %d.%d\n\n", deviceProp.major, deviceProp.minor);
+	}
 
-    float* a = new float[N];
-    float* dev = NULL;
+	number* input = (number*)malloc(SIZE * sizeof(number));
+	number* output = (number*)malloc(SIZE * sizeof(number));
+	fillArray(input);
 
-    cudaEvent_t start, stop;
-    float gpuTime = 0.0f;
-    cudaEventCreate(&start);
-    cudaEventCreate(&stop);
+	number* dev_input = 0;
+	number* dev_output = 0;
+	cudaMalloc((void**)&dev_input, SIZE * sizeof(number));
+	cudaMalloc((void**)&dev_output, SIZE * sizeof(number));
 
-    cudaEventRecord(start, 0);
+	cudaMemcpy(dev_input, input, SIZE * sizeof(number), cudaMemcpyHostToDevice);
 
-    cudaMalloc((void**)&dev, N * sizeof(float));
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
 
-    kernel << <dim3((N / 512), 1), dim3(512, 1) >> > (dev);
+	cudaEventRecord(start, 0);
 
-    cudaMemcpy(a, dev, N * sizeof(float), cudaMemcpyDeviceToHost);
+	invert << <(N + 512 - 1), N >> > (dev_input, dev_output);
 
-    cudaThreadSynchronize();
-    cudaEventRecord(stop, 0);
+	cudaMemcpy(output, dev_output, SIZE * sizeof(number), cudaMemcpyDeviceToHost);
 
-    cudaEventSynchronize(stop);
-    cudaEventElapsedTime(&gpuTime, start, stop);
+	cudaEventRecord(stop, 0);
+	cudaEventSynchronize(stop);
 
-    printf("GPU Time: %.2f milliseconds\n", gpuTime);
+	float elapsed;
+	cudaEventElapsedTime(&elapsed, start, stop);
 
-    cudaFree(dev);
+	printArray(output);
 
-    //Print solution
+	printf("GPU Time: %f ms\n", elapsed);
 
-    printf("\nTest values:\n");
-    printf("============================");
+	cudaFree(dev_input);
+	cudaFree(dev_output);
+	free(input);
+	free(output);
 
-    int idx = 0;
-    printf("\nValue at point (zero):\na[%d] = %.5f\n", idx, a[idx]);
-
-    idx = N / 12;
-    printf("\nValue at point (Pi/6):\na[%d] = %.5f\n", idx, a[idx]);
-
-    idx = N / 8;
-    printf("\nValue at point (Pi/4):\na[%d] = %.5f\n", idx, a[idx]);
-
-    idx = N / 6;
-    printf("\nValue at point (Pi/3):\na[%d] = %.5f\n", idx, a[idx]);
-
-    idx = N / 4;
-    printf("\nValue at point (Pi/2):\na[%d] = %.5f\n", idx, a[idx]);
-
-    printf("============================");
-
-    return 0;
+	return 0;
 }
+
+void fillArray(number*& input)
+{
+	for (int i = 0; i < SIZE; ++i)
+	{
+		*(input + i) = i + 1;
+	}
+}
+
+void printArray(number* input)
+{
+	if (SIZE < 10)
+	{
+		return;
+	}
+
+	for (int i = 0; i < 10; ++i)
+	{
+		printf("%d ", *(input + i));
+	}
+
+	printf(" ... ");
+
+	int offset = SIZE - 11;
+	for (int i = offset; i < SIZE; ++i)
+	{
+		printf("%d ", *(input + i));
+	}
+
+	printf("\n");
+}
+
